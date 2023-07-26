@@ -1,0 +1,56 @@
+1)
+SELECT id, username
+FROM users
+ORDER BY created_at
+LIMIT 5;
+
+2)
+SELECT users.id, users.username
+FROM users
+LEFT JOIN photos ON users.id = photos.user_id
+WHERE photos.user_id IS NULL;
+
+3)
+SELECT username, p.user_id, photo_id, COUNT(l.user_id) AS likes
+FROM likes l
+INNER JOIN photos p ON l.photo_id = p.id
+INNER JOIN users u ON p.user_id = u.id
+GROUP BY photo_id
+ORDER BY likes DESC
+LIMIT 1;
+
+4)
+SELECT tag_name, tag_id, COUNT(tag_id) AS times_used
+FROM photo_tags pt
+INNER JOIN tags t ON pt.tag_id = t.id
+GROUP BY tag_id
+ORDER BY times_used DESC
+LIMIT 5;
+
+5)
+SELECT DAYNAME(created_at) AS Day, COUNT(id) AS `Total Users registered`
+FROM users
+GROUP BY DAYNAME(created_at)
+ORDER BY `Total Users registered` DESC;
+
+6)
+SELECT ROUND(AVG(count)) AS `Average Number of posts per user`
+FROM (
+    SELECT user_id, COUNT(id) AS count
+    FROM photos
+    GROUP BY user_id
+) AS Average;
+
+7)
+SELECT COUNT(id) / (SELECT COUNT(id) FROM users) AS `Photos per User Ratio`
+FROM photos;
+
+8)
+SELECT u.id AS user_id, u.username AS `Username of fake account`
+FROM users u
+INNER JOIN (
+    SELECT user_id, COUNT(DISTINCT photo_id) AS total_photos_liked
+    FROM likes
+    GROUP BY user_id
+    HAVING total_photos_liked = (SELECT COUNT(id) FROM photos)
+) AS potential_bots ON u.id = potential_bots.user_id;
